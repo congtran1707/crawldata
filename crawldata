@@ -1,0 +1,35 @@
+from bs4 import BeautifulSoup
+import requests
+import pandas as pd
+
+url = "https://en.wikipedia.org/wiki/Hanoi"
+html_content = requests.get(url).text
+# Parse HTML code for the entire site
+df_soup = BeautifulSoup(html_content, "lxml")
+a = df_soup.find_all("table", class_= "wikitable")
+print("Number of tables on site: ",len(a))
+#select our wanted table
+a1 = df_soup.findAll("table", class_= "wikitable")[2]
+print("Number of tables on site: ",len(a1))
+table_rows = a1.find_all("tr")
+head = table_rows[0]
+
+headings = []
+for item in head.find_all("th"):
+    item = (item.text).rstrip("\n")
+    headings.append(item)
+print(headings)
+demographics = []
+for tr in table_rows:
+    district_demo = tr.find_all("td")
+    row_demo = [tr.text for tr in district_demo]
+#     row_demo = list(map(lambda x: x.replace('\n', ''), row_demo))
+    demographics.append(row_demo) 
+print(demographics)
+
+demographics2 = pd.DataFrame(data=demographics,columns=headings)
+demographics2['2019'] = demographics2['2019'].str.replace("\n", "").str.strip() 
+demographics2['Province'] = demographics2['Province'].str.replace("\n", "").str.strip() 
+# demodemographics2graphics3
+# demographics2=demographics2.drop(0)
+print(demographics2)
